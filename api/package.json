@@ -4,7 +4,7 @@
   "description": "Backend for the trekking website",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "react-scripts start",
     "dev": "nodemon server.js",
     "build": "react-scripts build"
   },
