@@ -6,7 +6,7 @@
   "scripts": {
     "start": "react-scripts start",
     "dev": "nodemon server.js",
-    "build": "react-scripts build"
+    "build": "echo 'No build step required'"
   },
   "keywords": [],
   "author": "",
