@@ -4,9 +4,8 @@
   "description": "Backend for the trekking website",
   "main": "server.js",
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "nodemon server.js",
-    "build": "echo 'No build step required'"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
