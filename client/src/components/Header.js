@@ -72,6 +72,7 @@ const Header = ({ setPage, currentUser, onLogout, theme, toggleTheme }) => {
                         <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('home'); }} className="text-gray-800 dark:text-white text-lg">Home</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('treks'); }} className="text-gray-800 dark:text-white text-lg">Treks</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('upcoming'); }} className="text-gray-800 dark:text-white text-lg">Upcoming</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('shop'); }} className="text-gray-800 dark:text-white text-lg">Shop</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('contact'); }} className="text-gray-800 dark:text-white text-lg">Contact</a>
                         <div className="w-full border-t border-gray-200 dark:border-gray-700 my-2"></div>
                         {currentUser ? (
