@@ -19,7 +19,26 @@ const sendOtpEmail = async (email, otp) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your Verification Code for Exploration Himalayan',
-        html: `<p>Your OTP is: <strong>${otp}</strong></p><p>This code is valid for 10 minutes.</p>`,
+        html: `
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Exploration Himalayan Logo" style="max-width: 150px;">
+            <h1 style="color: #0d9488;">Exploration Himalayan</h1>
+        </div>
+        <h2 style="color: #333;">Verify Your Action</h2>
+        <p>Hello,</p>
+        <p>Please use the following One-Time Password (OTP) to proceed. This code is valid for the next 10 minutes.</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <span style="font-size: 24px; font-weight: bold; letter-spacing: 10px; padding: 10px 20px; background-color: #f1f5f9; border-radius: 5px; color: #0d9488;">
+                ${otp}
+            </span>
+        </div>
+        <p>If you did not request this code, you can safely ignore this email.</p>
+        <p>Happy trekking,<br>The Exploration Himalayan Team</p>
+    </div>
+</div>
+        `,
     };
     await transporter.sendMail(mailOptions);
 };
@@ -29,7 +48,24 @@ const sendWelcomeEmail = async (name, email) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Welcome to Exploration Himalayan!',
-        html: `<p>Hi ${name}, welcome to Exploration Himalayan!</p>`,
+        html: `
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Exploration Himalayan Logo" style="max-width: 150px;">
+            <h1 style="color: #0d9488;">Welcome Aboard!</h1>
+        </div>
+        <h2 style="color: #333;">Hi ${name},</h2>
+        <p>We are thrilled to welcome you to the <strong>Exploration Himalayan</strong> community! Your account has been successfully created, and a world of adventure awaits.</p>
+        <p>You can now browse our exclusive treks, manage your bookings, and get in touch with our team directly from your dashboard.</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="http://localhost:3000" style="background-color: #0d9488; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Treks Now</a>
+        </div>
+        <p>If you have any questions, feel free to reply to this email or use the chat feature on our website.</p>
+        <p>The mountains are calling,<br>The Exploration Himalayan Team</p>
+    </div>
+</div>
+        `,
     };
     try {
         await transporter.sendMail(mailOptions);
@@ -43,7 +79,25 @@ const sendPasswordResetEmail = async (name, email, otp) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your Password Reset Code',
-        html: `<p>Hi ${name}, your password reset OTP is: <strong>${otp}</strong></p>`,
+        html: `
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Exploration Himalayan Logo" style="max-width: 150px;">
+            <h1 style="color: #0d9488;">Password Reset Request</h1>
+        </div>
+        <h2 style="color: #333;">Hi ${name},</h2>
+        <p>We received a request to reset the password for your account. Please use the following One-Time Password (OTP) to set a new password. This code is valid for 10 minutes.</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <span style="font-size: 24px; font-weight: bold; letter-spacing: 10px; padding: 10px 20px; background-color: #f1f5f9; border-radius: 5px; color: #0d9488;">
+                ${otp}
+            </span>
+        </div>
+        <p>If you did not request a password reset, you can safely ignore this email. Your password will not be changed.</p>
+        <p>Happy trekking,<br>The Exploration Himalayan Team</p>
+    </div>
+</div>
+        `,
     };
     await transporter.sendMail(mailOptions);
 };
