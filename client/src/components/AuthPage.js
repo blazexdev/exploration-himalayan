@@ -215,7 +215,7 @@ const AuthPage = ({ title, onLogin, onSignup, onLoginWithOtp, onGoogleSignIn, is
                     {resetStep === 2 && (
                         <form onSubmit={handleResetPassword} className="space-y-6">
                             <p className="text-center text-gray-600 dark:text-gray-400">An OTP has been sent to {email}.</p>
-                            <input type="text" placeholder="Enter 6-Digit OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
+                            <input type="text" placeholder="OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
                             <input type="password" placeholder="New Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" required />
                             <input type="password" placeholder="Confirm New Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" required />
                             <ResendButton />
@@ -250,7 +250,7 @@ const AuthPage = ({ title, onLogin, onSignup, onLoginWithOtp, onGoogleSignIn, is
                     {loginMethod === 'otp' && loginStep === 2 && (
                         <form onSubmit={handleLoginOtpVerification} className="space-y-6">
                             <p className="text-center text-gray-600 dark:text-gray-400">An OTP has been sent to {email}.</p>
-                            <input type="text" placeholder="Enter 6-Digit OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
+                            <input type="text" placeholder="OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
                             <ResendButton />
                             <button type="submit" disabled={isLoading} className="w-full bg-teal-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-600 disabled:opacity-50">{isLoading ? 'Verifying...' : 'Verify & Login'}</button>
                             <button type="button" onClick={() => setLoginStep(1)} className="w-full text-center text-sm text-gray-500 hover:underline">Back to email</button>
@@ -274,7 +274,7 @@ const AuthPage = ({ title, onLogin, onSignup, onLoginWithOtp, onGoogleSignIn, is
                 {signupStep === 2 && (
                     <form onSubmit={handleOtpVerification} className="space-y-6">
                         <p className="text-center text-gray-600 dark:text-gray-400">An OTP has been sent to {email}.</p>
-                        <input type="text" placeholder="Enter 6-Digit OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
+                        <input type="text" placeholder="OTP" value={otp} onChange={e => setOtp(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-center tracking-[1em]" maxLength="6" required />
                         <ResendButton />
                         <button type="submit" disabled={isLoading} className="w-full bg-teal-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-600 disabled:opacity-50">{isLoading ? 'Verifying...' : 'Verify & Sign Up'}</button>
                         <button type="button" onClick={() => setSignupStep(1)} className="w-full text-center text-sm text-gray-500 hover:underline">Back to details</button>
