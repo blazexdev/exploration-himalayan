@@ -112,6 +112,11 @@ exports.verifyNewBookingPayment = async (req, res) => {
 
         newBooking.paymentId = payment._id;
         const finalBooking = await newBooking.save();
+        await Notification.create({
+            recipient: 'admin',
+            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            link: '/admin'
+        });
         await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
         
         res.json({ success: true, message: "Payment successful and booking confirmed!", booking: finalBooking });
@@ -162,6 +167,11 @@ exports.verifyExistingBookingPayment = async (req, res) => {
         }
         
         const finalBooking = await bookingToUpdate.save();
+        await Notification.create({
+            recipient: 'admin',
+            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            link: '/admin'
+        });
         await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
 
         res.json({ success: true, message: "Payment successful and booking updated!", booking: finalBooking });
@@ -197,6 +207,12 @@ exports.verifyProductPayment = async (req, res) => {
         });
 
         const savedOrder = await newOrder.save();
+
+        await Notification.create({
+            recipient: 'admin',
+            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            link: '/admin'
+        });
         
         // You can create and send a product-specific invoice email here if you like
         
