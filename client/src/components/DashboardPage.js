@@ -1,5 +1,3 @@
-// client/src/components/DashboardPage.js
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Modal from './Modal';
 import api from '../services/api';
@@ -146,6 +144,7 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
         setIsLoading(true);
         try {
             const { data: { order } } = await api.createRazorpayOrder(paymentAmount, selectedBooking._id);
+
             const options = {
                 key: process.env.REACT_APP_RAZORPAY_KEY_ID,
                 amount: order.amount,
@@ -165,7 +164,6 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
                     
                     const { data } = await api.verifyExistingBookingPayment(paymentData);
                     if (data.success) {
-                        // --- FIX: Pass both the booking and the payment to the handler ---
                         onBookingUpdate(data.booking, data.payment);
                         closePaymentModal();
                     } else {
