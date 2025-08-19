@@ -1,3 +1,6 @@
+// client/src/App.js
+// --- CORRECTED FILE ---
+
 import React, { useState, useEffect } from 'react';
 import api from './services/api';
 import Header from './components/Header';
@@ -122,23 +125,6 @@ export default function App() {
         
         initializeApp();
     }, []);
-
-    // --- THIS IS THE FIX: Real-time chat polling ---
-    useEffect(() => {
-        if (!currentUser) return; // Only poll for messages if a user is logged in
-
-        const interval = setInterval(async () => {
-            try {
-                const res = await api.getMessages();
-                setMessages(res.data);
-            } catch (error) {
-                console.error("Failed to poll for new messages:", error);
-            }
-        }, 3000); // Check for new messages every 3 seconds
-
-        return () => clearInterval(interval); // Clean up the interval on component unmount
-    }, [currentUser]);
-
 
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
