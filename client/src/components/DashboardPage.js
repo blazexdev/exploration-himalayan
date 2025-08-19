@@ -165,7 +165,8 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
                     
                     const { data } = await api.verifyExistingBookingPayment(paymentData);
                     if (data.success) {
-                        onBookingUpdate(data.booking); // This triggers the success modal
+                        // --- FIX: Pass both the booking and the payment to the handler ---
+                        onBookingUpdate(data.booking, data.payment);
                         closePaymentModal();
                     } else {
                         onPaymentFailure('Payment verification failed.');
@@ -180,7 +181,7 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
             });
             rzp.open();
         } catch (error) {
-            onPaymentFailure('Could not initiate payment.');
+            onPaymentFailure('Failed to initiate payment.');
         } finally {
             setIsLoading(false);
         }
