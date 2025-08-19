@@ -1,5 +1,4 @@
 // client/src/components/TrekDetailPage.js
-// --- UPDATED FILE ---
 
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from './Modal';
@@ -69,7 +68,6 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
     const [editRating, setEditRating] = useState(0);
     const [editComment, setEditComment] = useState('');
     const [editMedia, setEditMedia] = useState([]);
-    const [newEditMediaUrl, setNewEditMediaUrl] = useState('');
     const [activeReviewMenu, setActiveReviewMenu] = useState(null);
 
     const [detailsRef, isDetailsVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -146,7 +144,7 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
             const options = {
                 key: process.env.REACT_APP_RAZORPAY_KEY_ID,
                 amount: order.amount,
-                currency: order.currency,
+                currency: "INR",
                 name: "Exploration Himalayan",
                 description: `Booking for ${trek.name}`,
                 image: "https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png",
@@ -168,7 +166,6 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
                     
                     const { data } = await api.verifyNewBookingPayment(paymentData);
                     if (data.success) {
-                        // --- FIX: Pass both the booking and the payment to the handler ---
                         onNewBooking(data.booking, data.payment);
                     } else {
                         onPaymentFailure('Payment verification failed.');
@@ -460,8 +457,10 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
                             alt="Trek media enlarged" 
                             className="w-full h-auto max-h-[80vh] object-contain rounded-lg" 
                         />
-                        <button onClick={handlePrevPhoto} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/70 transition-colors focus:outline-none" aria-label="Previous image">{icons.chevronLeft}</button>
-                        <button onClick={handleNextPhoto} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/70 transition-colors focus:outline-none" aria-label="Next image">{icons.chevronRight}</button>
+                        <div className="absolute inset-0 flex justify-between items-center px-2 sm:px-4">
+                            <button onClick={handlePrevPhoto} className="bg-black/40 text-white p-2 rounded-full hover:bg-black/70 transition-colors focus:outline-none" aria-label="Previous image">{icons.chevronLeft}</button>
+                            <button onClick={handleNextPhoto} className="bg-black/40 text-white p-2 rounded-full hover:bg-black/70 transition-colors focus:outline-none" aria-label="Next image">{icons.chevronRight}</button>
+                        </div>
                     </div>
                 )}
             </Modal>
