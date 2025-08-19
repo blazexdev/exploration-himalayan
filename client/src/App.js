@@ -383,6 +383,14 @@ export default function App() {
         setProducts(prev => prev.map(p => p._id === updatedProduct._id ? updatedProduct : p));
     };
 
+    const handleNotificationUpdate = (updatedNotification) => {
+        if (updatedNotification) {
+            setNotifications(prev => prev.map(n => n._id === updatedNotification._id ? updatedNotification : n));
+        } else {
+            api.getNotifications().then(res => setNotifications(res.data));
+        }
+    };
+
     const renderPage = () => {
         switch (page.name) {
             case 'details':
