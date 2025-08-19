@@ -25,13 +25,13 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
         if (!container) return;
 
         const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150;
-        const didUserSendMessage = userMessages.length > prevMessagesCount.current && userMessages[userMessages.length - 1]?.from === currentUser.email;
+        const isNewMessage = userMessages.length > prevMessagesCount.current;
 
-        if (isScrolledToBottom || didUserSendMessage) {
+        if (isScrolledToBottom && isNewMessage) {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
         prevMessagesCount.current = userMessages.length;
-    }, [userMessages, currentUser.email]);
+    }, [userMessages]);
 
     const handleMediaUpload = (e) => {
         const file = e.target.files[0];
@@ -46,6 +46,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
                 content: reader.result,
                 fileName: file.name,
             });
+            setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
         };
         reader.readAsDataURL(file);
     };
