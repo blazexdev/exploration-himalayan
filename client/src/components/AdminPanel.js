@@ -34,6 +34,7 @@ const AdminPanel = ({
     const [selectedUser, setSelectedUser] = useState(null);
     const [replyMessage, setReplyMessage] = useState('');
     const [replyMedia, setReplyMedia] = useState([]);
+    const chatContainerRef = useRef(null);
     const chatEndRef = useRef(null);
     const [adminEmail, setAdminEmail] = useState('');
     const [adminMessage, setAdminMessage] = useState('');
@@ -65,15 +66,16 @@ const AdminPanel = ({
         return acc;
     }, {}), [messages]);
 
-    const prevMessagesCount = useRef(userConversations[selectedUser]?.length);
-
     useEffect(() => {
-        const currentMessages = userConversations[selectedUser];
-        if (currentMessages && currentMessages.length > (prevMessagesCount.current || 0)) {
+        const container = chatContainerRef.current;
+        if (!container) return;
+
+        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
+
+        if (isScrolledToBottom) {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-        prevMessagesCount.current = currentMessages?.length;
-    }, [userConversations, selectedUser]);
+    }, [userConversations[selectedUser]]);
     
     const filteredTreks = useMemo(() =>
         treks.filter(t =>
@@ -214,6 +216,7 @@ const AdminPanel = ({
             onSendMessage({ type: 'text', from: 'admin', to: selectedUser, content: replyMessage.trim() });
             setReplyMessage('');
         }
+        setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     };
     const handleManageAdmin = async (makeAdmin) => {
         setAdminMessage('');
