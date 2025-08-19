@@ -54,7 +54,7 @@ const StarRating = ({ rating, onRatingChange }) => {
     );
 };
 
-const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBookingUpdate, onNewReview, onUpdateReview, onDeleteReview, currentUser, setPage }) => {
+const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBookingUpdate, onPaymentFailure, onNewReview, onUpdateReview, onDeleteReview, currentUser, setPage }) => {
     const [formData, setFormData] = useState({ name: '', email: '', date: '', phone: '', address: '', gender: '', age: '' });
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -168,19 +168,21 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
                     
                     const { data } = await api.verifyNewBookingPayment(paymentData);
                     if (data.success) {
-                        onNewBooking(data.booking);
-                        setIsBookingModalOpen(true);
+                        onNewBooking(data.booking); // This now triggers the success modal in App.js
                     } else {
-                        setPaymentError('Payment verification failed.');
+                        onPaymentFailure('Payment verification failed.');
                     }
                 },
                 prefill: { name: currentUser.name, email: currentUser.email, contact: currentUser.phone || '' },
                 theme: { color: "#0d9488" },
             };
             const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                onPaymentFailure(response.error.description);
+            });
             rzp.open();
         } catch (error) {
-            setPaymentError('Failed to initiate payment.');
+            onPaymentFailure('Could not initiate payment.');
         }
     };
 
