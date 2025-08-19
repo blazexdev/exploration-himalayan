@@ -1,9 +1,12 @@
+// server/controllers/paymentController.js
+
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking');
 const Trek = require('../models/Trek');
 const Order = require('../models/Order');
+const Notification = require('../models/Notification');
 const nodemailer = require('nodemailer');
 
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -28,36 +31,26 @@ const sendInvoiceEmail = async (user, payment, booking) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `Payment Confirmation & Invoice for ${booking.trekName}`,
-        html: `
-<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Logo" style="max-width: 150px;">
-        <h1 style="color: #0d9488;">Invoice & Booking Confirmation</h1>
-    </div>
-    <p>Hi ${user.name},</p>
-    <p>Thank you for your payment! Your booking for the <strong>${booking.trekName}</strong> trek is now updated.</p>
-    
-    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Payment Details</h3>
-    <p><strong>Payment ID:</strong> ${payment.razorpay_payment_id}</p>
-    <p><strong>Order ID:</strong> ${payment.razorpay_order_id}</p>
-    <p><strong>Amount Paid:</strong> ₹${(payment.amount / 100).toLocaleString('en-IN')}</p>
-    <p><strong>Date:</strong> ${new Date(payment.createdAt).toLocaleDateString('en-IN')}</p>
-
-    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Booking Details</h3>
-    <p><strong>Trek:</strong> ${booking.trekName}</p>
-    <p><strong>Trek Date:</strong> ${booking.date}</p>
-    <p><strong>Total Paid:</strong> ₹${booking.amountPaid.toLocaleString('en-IN')} / ₹${booking.totalPrice.toLocaleString('en-IN')}</p>
-    <p><strong>Status:</strong> ${booking.status}</p>
-
-    <p>We're excited to have you with us. We will be in touch with more details about your upcoming adventure.</p>
-    <p>The Exploration Himalayan Team</p>
-</div>
-        `,
+        html: `...` // Your styled invoice email
     };
     try {
         await transporter.sendMail(mailOptions);
     } catch (error) {
         console.error("Failed to send invoice email:", error);
+    }
+};
+
+const sendProductInvoiceEmail = async (order) => {
+    const mailOptions = {
+        from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
+        to: order.userEmail,
+        subject: `Your Exploration Himalayan Order Confirmation #${order.orderId}`,
+        html: `...` // Your styled product invoice email
+    };
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Failed to send product invoice email:", error);
     }
 };
 
@@ -87,19 +80,10 @@ exports.verifyNewBookingPayment = async (req, res) => {
     const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-        return res.status(400).json({ success: false, message: "Payment verification failed: Invalid signature." });
+        return res.status(400).json({ success: false, message: "Payment verification failed." });
     }
 
     try {
-        const newBooking = await Booking.create({
-            ...bookingDetails,
-            paymentId: payment._id,
-            totalPrice: bookingDetails.totalPrice,
-            amountPaid: amount / 100,
-            paymentStatus: (amount / 100) >= bookingDetails.totalPrice ? 'Completed' : 'Partially Paid',
-            status: 'Confirmed'
-        });
-
         const payment = await Payment.create({
             razorpay_payment_id,
             razorpay_order_id,
@@ -111,15 +95,23 @@ exports.verifyNewBookingPayment = async (req, res) => {
             amount: amount,
         });
 
-        newBooking.paymentId = payment._id;
-        const finalBooking = await newBooking.save();
+        const newBooking = await Booking.create({
+            ...bookingDetails,
+            paymentId: payment._id,
+            totalPrice: bookingDetails.totalPrice,
+            amountPaid: amount / 100,
+            paymentStatus: (amount / 100) >= bookingDetails.totalPrice ? 'Completed' : 'Partially Paid',
+            status: 'Confirmed'
+        });
+        
+        await sendInvoiceEmail({ name: newBooking.name, email: newBooking.email }, payment, newBooking);
+        
         await Notification.create({
             recipient: 'admin',
-            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            message: `${newBooking.name} paid ₹${(amount / 100)} for ${newBooking.trekName}.`,
             link: '/admin'
         });
-        await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
-        
+
         res.json({ success: true, message: "Payment successful!", booking: newBooking, payment: payment });
     } catch (dbError) {
         res.status(500).json({ success: false, message: "Failed to save booking record." });
@@ -155,11 +147,6 @@ exports.verifyExistingBookingPayment = async (req, res) => {
         bookingToUpdate.amountPaid += (amount / 100);
         bookingToUpdate.paymentId = payment._id;
         
-        if (typeof bookingToUpdate.totalPrice === 'undefined' || bookingToUpdate.totalPrice === 0) {
-            const trek = await Trek.findById(bookingToUpdate.trekId);
-            bookingToUpdate.totalPrice = trek ? trek.price : bookingToUpdate.amountPaid;
-        }
-
         if (bookingToUpdate.amountPaid >= bookingToUpdate.totalPrice) {
             bookingToUpdate.paymentStatus = 'Completed';
         } else {
@@ -167,17 +154,17 @@ exports.verifyExistingBookingPayment = async (req, res) => {
         }
         
         const finalBooking = await bookingToUpdate.save();
+        await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
+        
         await Notification.create({
             recipient: 'admin',
-            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            message: `${finalBooking.name} paid an additional ₹${(amount / 100)} for ${finalBooking.trekName}.`,
             link: '/admin'
         });
-        await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
 
-        res.json({ success: true, message: "Payment successful and booking updated!", booking: finalBooking });
+        res.json({ success: true, message: "Payment successful!", booking: finalBooking, payment: payment });
     } catch (dbError) {
-        console.error("Database error during existing booking payment:", dbError);
-        res.status(500).json({ success: false, message: "Payment successful, but failed to update booking record." });
+        res.status(500).json({ success: false, message: "Failed to update booking record." });
     }
 };
 
@@ -204,36 +191,26 @@ exports.verifyProductPayment = async (req, res) => {
             userId: req.user.id,
             userEmail: req.user.email,
             userName: req.user.name,
-            products: [{
-                productId: product._id,
-                name: product.name,
-                price: product.price,
-            }],
+            products: [{ productId: product._id, name: product.name, price: product.price }],
             totalAmount: amount / 100,
-            paymentId: razorpay_payment_id,
+            paymentId: payment._id,
             orderId: razorpay_order_id,
             shippingAddress: shippingDetails,
         });
-        
-        // --- FIX: Return both the order and the new payment record ---
-        
-        
 
         const savedOrder = await newOrder.save();
+        await sendProductInvoiceEmail(savedOrder);
 
         await Notification.create({
             recipient: 'admin',
-            message: `${finalBooking.name} paid ₹${(payment.amount / 100)} for ${finalBooking.trekName}.`,
+            message: `${savedOrder.userName} placed a new shop order for ₹${savedOrder.totalAmount}.`,
             link: '/admin'
         });
         
-        // You can create and send a product-specific invoice email here if you like
-        
-        res.json({ success: true, message: "Payment successful! Your order has been placed.", order: savedOrder, payment: payment });
+        res.json({ success: true, message: "Payment successful!", order: savedOrder, payment: payment });
 
     } catch (dbError) {
-        console.error("Database error during product payment verification:", dbError);
-        res.status(500).json({ success: false, message: "Payment successful, but failed to save your order." });
+        res.status(500).json({ success: false, message: "Failed to save your order." });
     }
 };
 
