@@ -24,7 +24,6 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
         const container = chatContainerRef.current;
         if (!container) return;
 
-        // Only scroll if the user was already near the bottom OR if they sent a new message
         const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150;
         const didUserSendMessage = userMessages.length > prevMessagesCount.current && userMessages[userMessages.length - 1]?.from === currentUser.email;
 
@@ -61,6 +60,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
             content: newMessage.trim(),
         });
         setNewMessage('');
+        setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     };
 
     return (
