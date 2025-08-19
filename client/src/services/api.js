@@ -67,6 +67,11 @@ const deleteProductReview = (productId, reviewId) => API.delete(`/products/${pro
 // Orders
 const getOrders = () => API.get('/orders');
 
+// --- NEW Notification Functions ---
+const getNotifications = () => API.get('/notifications');
+const markNotificationAsRead = (id) => API.post(`/notifications/${id}/read`);
+const markAllNotificationsAsRead = () => API.post('/notifications/read-all');
+
 const api = {
     loadUser,
     login,
@@ -109,6 +114,9 @@ const api = {
     updateProductReview,
     deleteProductReview,
     getOrders,
+    getNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
 };
 
 export default api;
