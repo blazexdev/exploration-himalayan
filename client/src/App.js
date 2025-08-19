@@ -1,6 +1,3 @@
-// client/src/App.js
-// --- CORRECTED FILE ---
-
 import React, { useState, useEffect } from 'react';
 import api from './services/api';
 import Header from './components/Header';
@@ -47,27 +44,6 @@ export default function App() {
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [paymentStatus, setPaymentStatus] = useState({ show: false, status: '', message: '' });
-
-    const reloadUserData = async () => {
-        if (localStorage.getItem('token')) {
-            try {
-                const [bookingsRes, messagesRes, usersRes, paymentsRes, ordersRes] = await Promise.all([
-                    api.getBookings(),
-                    api.getMessages(),
-                    api.getUsers(),
-                    api.getPayments(),
-                    api.getOrders()
-                ]);
-                setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
-                setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
-                setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
-                setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : []);
-                setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
-            } catch (error) {
-                console.error("Failed to reload user data:", error);
-            }
-        }
-    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -293,18 +269,21 @@ export default function App() {
         }
     };
 
-    const handleNewBooking = async (newBooking, newPayment) => {
-        await reloadUserData();
+    const handleNewBooking = (newBooking, newPayment) => {
+        setBookings(prev => [newBooking, ...prev]);
+        if (newPayment) setPayments(prev => [newPayment, ...prev]);
         setPaymentStatus({ show: true, status: 'success', message: 'Your booking has been confirmed!' });
     };
 
-    const handleBookingUpdate = async (updatedBooking, newPayment) => {
-        await reloadUserData();
+    const handleBookingUpdate = (updatedBooking, newPayment) => {
+        setBookings(prev => prev.map(b => b._id === updatedBooking._id ? updatedBooking : b));
+        if (newPayment) setPayments(prev => [newPayment, ...prev]);
         setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
     };
 
-    const handleNewOrder = async (newOrder, newPayment) => {
-        await reloadUserData();
+    const handleNewOrder = (newOrder, newPayment) => {
+        setOrders(prev => [newOrder, ...prev]);
+        if (newPayment) setPayments(prev => [newPayment, ...prev]);
         setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
     };
     
@@ -381,14 +360,6 @@ export default function App() {
 
     const handleProductUpdate = (updatedProduct) => {
         setProducts(prev => prev.map(p => p._id === updatedProduct._id ? updatedProduct : p));
-    };
-
-    const handleNotificationUpdate = (updatedNotification) => {
-        if (updatedNotification) {
-            setNotifications(prev => prev.map(n => n._id === updatedNotification._id ? updatedNotification : n));
-        } else {
-            api.getNotifications().then(res => setNotifications(res.data));
-        }
     };
 
     const renderPage = () => {
@@ -537,16 +508,16 @@ export default function App() {
                     aria-label="Open Chat Options"
                 >
                     {(isChatPopupOpen || isChatOpen) ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                     )}
                 </button>
             </div>
             
             {showBackToTop && (
                 <button onClick={scrollToTop} className="fixed bottom-28 right-6 bg-gray-500/50 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 hover:bg-gray-500 transition-all duration-300 z-40">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                 </button>
             )}
 
