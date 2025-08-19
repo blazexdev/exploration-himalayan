@@ -66,16 +66,24 @@ const AdminPanel = ({
         return acc;
     }, {}), [messages]);
 
+    const prevMessagesCount = useRef({});
+
     useEffect(() => {
         const container = chatContainerRef.current;
-        if (!container) return;
+        if (!container || !selectedUser) return;
 
-        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 100;
+        const currentMessages = userConversations[selectedUser] || [];
+        const prevCount = prevMessagesCount.current[selectedUser] || 0;
+        
+        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150;
 
-        if (isScrolledToBottom) {
+        if (currentMessages.length > prevCount && isScrolledToBottom) {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [userConversations[selectedUser]]);
+        
+        prevMessagesCount.current[selectedUser] = currentMessages.length;
+
+    }, [userConversations, selectedUser]);
     
     const filteredTreks = useMemo(() =>
         treks.filter(t =>
@@ -508,20 +516,20 @@ const AdminPanel = ({
                     <div className="md:col-span-2 bg-gray-50 dark:bg-gray-900 rounded-lg flex flex-col h-[60vh]">
                         {selectedUser ? (
                             <>
-                                <div className="flex-grow p-6 space-y-4 overflow-y-auto">
-                                    {userConversations[selectedUser].map(msg => (
-                                        <div key={msg._id} className={`flex items-end gap-3 ${msg.from === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                                            {msg.from !== 'admin' && (
-                                                <img src={selectedUserData?.imageUrl || `https://placehold.co/40x40/e2e8f0/4a5568?text=${selectedUserData?.name.charAt(0)}`} alt={selectedUserData?.name} className="w-8 h-8 rounded-full object-cover"/>
+                                <div ref={chatContainerRef} className="flex-grow p-6 space-y-4 overflow-y-auto">
+                                    {(userConversations[selectedUser] || []).map(msg => (
+                                        <div key={msg._id} className={`flex items-end gap-3 ${msg.from === 'admin' ? 'justify-start' : 'justify-end'}`}>
+                                            {msg.from === 'admin' && (
+                                                <img src={LOGO_URL} alt="Admin" className="w-8 h-8 rounded-full object-cover"/>
                                             )}
-                                            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.from === 'admin' ? 'bg-teal-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.from === 'admin' ? 'bg-gray-200 dark:bg-gray-700' : 'bg-teal-500 text-white'}`}>
                                                 {msg.type === 'text' && <p>{msg.content}</p>}
                                                 {msg.type === 'image' && <img src={msg.content} alt={msg.fileName} className="rounded-lg"/>}
                                                 {msg.type === 'video' && <video src={msg.content} controls className="rounded-lg w-full"/>}
                                                 <p className="text-xs opacity-70 mt-1 text-right">{new Date(msg.timestamp).toLocaleTimeString()}</p>
                                             </div>
-                                            {msg.from === 'admin' && (
-                                                <img src={LOGO_URL} alt="Admin" className="w-8 h-8 rounded-full object-cover"/>
+                                             {msg.from !== 'admin' && (
+                                                <img src={selectedUserData?.imageUrl || `https://placehold.co/40x40/e2e8f0/4a5568?text=${selectedUserData?.name.charAt(0)}`} alt={selectedUserData?.name} className="w-8 h-8 rounded-full object-cover"/>
                                             )}
                                         </div>
                                     ))}
