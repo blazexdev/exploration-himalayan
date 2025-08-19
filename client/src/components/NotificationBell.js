@@ -22,7 +22,7 @@ const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
     }, []);
 
     const handleNotificationClick = async (notification) => {
-        setPage({ name: notification.link.substring(1) }); // Navigate to page
+        setPage({ name: notification.link.substring(1) });
         if (!notification.isRead) {
             const res = await api.markNotificationAsRead(notification._id);
             onNotificationUpdate(res.data);
@@ -32,7 +32,7 @@ const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
 
     const handleMarkAllRead = async () => {
         await api.markAllNotificationsAsRead();
-        onNotificationUpdate(null); // This will trigger a refetch in App.js
+        onNotificationUpdate(null);
     };
 
     return (
@@ -46,7 +46,9 @@ const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
                 )}
             </button>
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50">
+                // --- THIS IS THE FIX ---
+                // Added responsive classes to keep the dropdown on-screen on mobile
+                <div className="absolute top-full right-0 md:right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm md:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50">
                     <div className="p-4 flex justify-between items-center border-b dark:border-gray-700">
                         <h3 className="font-bold">Notifications</h3>
                         {unreadCount > 0 && (
