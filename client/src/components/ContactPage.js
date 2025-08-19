@@ -1,6 +1,4 @@
-// client/src/components/ContactPage.js
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 const icons = {
   send: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>,
@@ -11,21 +9,30 @@ const LOGO_URL = "https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png";
 
 const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
-    const [newMedia, setNewMedia] = useState([]);
+    const chatContainerRef = useRef(null);
     const chatEndRef = useRef(null);
 
-    const userMessages = messages.filter(
-        msg => (msg.from === currentUser.email && msg.to === 'admin') || (msg.from === 'admin' && msg.to === currentUser.email)
-    );
+    const userMessages = useMemo(() => 
+        messages.filter(
+            msg => (msg.from === currentUser.email && msg.to === 'admin') || (msg.from === 'admin' && msg.to === currentUser.email)
+        ), 
+    [messages, currentUser.email]);
 
     const prevMessagesCount = useRef(userMessages.length);
 
     useEffect(() => {
-        if (userMessages.length > prevMessagesCount.current) {
+        const container = chatContainerRef.current;
+        if (!container) return;
+
+        // Only scroll if the user was already near the bottom OR if they sent a new message
+        const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150;
+        const didUserSendMessage = userMessages.length > prevMessagesCount.current && userMessages[userMessages.length - 1]?.from === currentUser.email;
+
+        if (isScrolledToBottom || didUserSendMessage) {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
         prevMessagesCount.current = userMessages.length;
-    }, [userMessages.length]);
+    }, [userMessages, currentUser.email]);
 
     const handleMediaUpload = (e) => {
         const file = e.target.files[0];
@@ -60,7 +67,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
         <div className="container mx-auto px-4 sm:px-6 py-12">
             <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-8">Contact Us</h1>
             <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 flex flex-col h-[75vh]">
-                <div className="flex-grow p-6 space-y-4 overflow-y-auto">
+                <div ref={chatContainerRef} className="flex-grow p-6 space-y-4 overflow-y-auto">
                     {userMessages.map(msg => (
                         <div key={msg._id} className={`flex items-end gap-3 ${msg.from === 'admin' ? 'justify-start' : 'justify-end'}`}>
                             {msg.from === 'admin' && (
