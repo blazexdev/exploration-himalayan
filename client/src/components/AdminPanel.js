@@ -1,3 +1,5 @@
+// client/src/components/AdminPanel.js
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import api from '../services/api';
 import SearchInput from './SearchInput';
