@@ -17,8 +17,8 @@ import LoadingScreen from './components/LoadingScreen';
 import ChatWindow from './components/ChatWindow';
 import ShopPage from './components/ShopPage';
 import ProductDetailPage from './components/ProductDetailPage';
+import PaymentStatusModal from './components/PaymentStatusModal';
 import NotificationBell from './components/NotificationBell';
-import PaymentStatusModal from './components/PaymentStatusModal'; // New import
 
 const AboutUsPage = () => <StaticPage title="About Us"><p>Welcome to Exploration Himalayan! We are passionate about sharing the breathtaking beauty of the Himalayas with adventurers from around the world...</p></StaticPage>;
 const PrivacyPolicyPage = () => <StaticPage title="Privacy Policy"><p>Your privacy is important to us...</p></StaticPage>;
@@ -48,28 +48,24 @@ export default function App() {
     const [notifications, setNotifications] = useState([]);
     const [paymentStatus, setPaymentStatus] = useState({ show: false, status: '', message: '' });
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            if (localStorage.getItem('token')) {
-                try {
-                    const res = await api.getNotifications();
-                    setNotifications(res.data);
-                } catch (err) {
-                    console.error("Could not fetch notifications");
-                }
+    const reloadUserData = async () => {
+        if (localStorage.getItem('token')) {
+            try {
+                const [bookingsRes, messagesRes, usersRes, paymentsRes, ordersRes] = await Promise.all([
+                    api.getBookings(),
+                    api.getMessages(),
+                    api.getUsers(),
+                    api.getPayments(),
+                    api.getOrders()
+                ]);
+                setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
+                setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
+                setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
+                setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : []);
+                setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+            } catch (error) {
+                console.error("Failed to reload user data:", error);
             }
-        };
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 15000); // Poll every 15 seconds
-        return () => clearInterval(interval);
-    }, [currentUser]); // Refetch when user logs in/out
-
-    const handleNotificationUpdate = (updatedNotification) => {
-        if (updatedNotification) {
-            setNotifications(prev => prev.map(n => n._id === updatedNotification._id ? updatedNotification : n));
-        } else {
-            // If null is passed, refetch all notifications (used for mark all as read)
-            api.getNotifications().then(res => setNotifications(res.data));
         }
     };
 
@@ -132,18 +128,7 @@ export default function App() {
                 setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
 
                 if (loggedInUser) {
-                    const [bookingsRes, messagesRes, usersRes, paymentsRes, ordersRes] = await Promise.all([
-                        api.getBookings(),
-                        api.getMessages(),
-                        api.getUsers(),
-                        api.getPayments(),
-                        api.getOrders()
-                    ]);
-                    setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
-                    setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
-                    setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
-                    setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : []);
-                    setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+                   await reloadUserData();
                 }
             } catch (error) {
                 console.error("Failed to load data:", error);
@@ -308,20 +293,23 @@ export default function App() {
         }
     };
 
-    const handleNewBooking = (newBooking, newPayment) => {
-        setBookings(prev => [newBooking, ...prev]);
-        handleNewPayment(newPayment);
+    const handleNewBooking = async (newBooking, newPayment) => {
+        await reloadUserData();
         setPaymentStatus({ show: true, status: 'success', message: 'Your booking has been confirmed!' });
     };
 
-    const handlePaymentFailure = (message) => {
-        setPaymentStatus({ show: true, status: 'failure', message: message || 'Your payment could not be processed.' });
+    const handleBookingUpdate = async (updatedBooking, newPayment) => {
+        await reloadUserData();
+        setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
     };
 
-    const handleBookingUpdate = (updatedBooking, newPayment) => {
-        setBookings(prev => prev.map(b => b._id === updatedBooking._id ? updatedBooking : b));
-        handleNewPayment(newPayment);
-        setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
+    const handleNewOrder = async (newOrder, newPayment) => {
+        await reloadUserData();
+        setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
+    };
+    
+    const handlePaymentFailure = (message) => {
+        setPaymentStatus({ show: true, status: 'failure', message: message || 'Your payment could not be processed.' });
     };
 
     const handleTrekFormSubmit = async (trekData, trekId) => {
@@ -389,18 +377,6 @@ export default function App() {
             await api.deleteProduct(productId);
             setProducts(prev => prev.filter(p => p._id !== productId));
         }
-    };
-
-    const handleNewPayment = (newPayment) => {
-        if (newPayment) {
-            setPayments(prev => [newPayment, ...prev]);
-        }
-    };
-
-    const handleNewOrder = (newOrder, newPayment) => {
-        setOrders(prev => [newOrder, ...prev]);
-        handleNewPayment(newPayment);
-        setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
     };
 
     const handleProductUpdate = (updatedProduct) => {
