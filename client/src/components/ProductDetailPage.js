@@ -1,6 +1,3 @@
-// client/src/components/ProductDetailPage.js
-// --- CORRECTED FILE ---
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Modal from './Modal';
 import api from '../services/api';
@@ -343,6 +340,19 @@ const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onPr
                     </div>
                 </div>
             </div>
+            <Modal isOpen={isCheckoutModalOpen} onClose={() => setIsCheckoutModalOpen(false)} size="lg">
+                <h2 className="text-2xl font-bold text-center mb-6">Shipping Details</h2>
+                <form onSubmit={handleProceedToPayment} className="space-y-4">
+                    <input type="text" name="name" placeholder="Full Name" value={shippingDetails.name} onChange={handleShippingChange} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" required />
+                    <input type="email" name="email" placeholder="Email Address" value={shippingDetails.email} onChange={handleShippingChange} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" required />
+                    <input type="tel" name="phone" placeholder="Phone Number" value={shippingDetails.phone} onChange={handleShippingChange} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" required />
+                    <textarea name="address" placeholder="Full Shipping Address" value={shippingDetails.address} onChange={handleShippingChange} className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700" rows="3" required></textarea>
+                    {error && <p className="text-red-500 text-center">{error}</p>}
+                    <button type="submit" disabled={isLoading} className="w-full bg-teal-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-600 disabled:opacity-50">
+                        {isLoading ? 'Processing...' : `Proceed to Pay ₹${product.price.toLocaleString('en-IN')}`}
+                    </button>
+                </form>
+            </Modal>
             <Modal isOpen={selectedImageIndex !== null} onClose={() => setSelectedImageIndex(null)} size="4xl">
                 {selectedImageIndex !== null && (
                     <div className="relative">
