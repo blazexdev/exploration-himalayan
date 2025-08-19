@@ -215,12 +215,7 @@ exports.verifyProductPayment = async (req, res) => {
         await sendProductInvoiceEmail(savedOrder);
         
         // --- FIX: Return both the order and the new payment record ---
-        res.json({ success: true, message: "Payment successful!", order: savedOrder, payment: payment });
-
-    } catch (dbError) {
-        res.status(500).json({ success: false, message: "Failed to save your order." });
-    }
-};
+        
         const newOrder = new Order({
             userId: req.user.id,
             userEmail: req.user.email,
@@ -246,7 +241,7 @@ exports.verifyProductPayment = async (req, res) => {
         
         // You can create and send a product-specific invoice email here if you like
         
-        res.json({ success: true, message: "Payment successful! Your order has been placed.", order: savedOrder });
+        res.json({ success: true, message: "Payment successful! Your order has been placed.", order: savedOrder, payment: payment });
 
     } catch (dbError) {
         console.error("Database error during product payment verification:", dbError);
