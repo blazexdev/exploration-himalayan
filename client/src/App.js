@@ -18,6 +18,7 @@ import ChatWindow from './components/ChatWindow';
 import ShopPage from './components/ShopPage';
 import ProductDetailPage from './components/ProductDetailPage';
 import NotificationBell from './components/NotificationBell';
+import PaymentStatusModal from './components/PaymentStatusModal'; // New import
 
 const AboutUsPage = () => <StaticPage title="About Us"><p>Welcome to Exploration Himalayan! We are passionate about sharing the breathtaking beauty of the Himalayas with adventurers from around the world...</p></StaticPage>;
 const PrivacyPolicyPage = () => <StaticPage title="Privacy Policy"><p>Your privacy is important to us...</p></StaticPage>;
@@ -45,6 +46,7 @@ export default function App() {
     const [isChatPopupOpen, setIsChatPopupOpen] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [paymentStatus, setPaymentStatus] = useState({ show: false, status: '', message: '' });
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -308,10 +310,16 @@ export default function App() {
 
     const handleNewBooking = (newBooking) => {
         setBookings(prev => [newBooking, ...prev]);
+        setPaymentStatus({ show: true, status: 'success', message: 'Your booking inquiry has been sent!' });
+    };
+
+    const handlePaymentFailure = (message) => {
+        setPaymentStatus({ show: true, status: 'failure', message: message || 'Your payment could not be processed.' });
     };
 
     const handleBookingUpdate = (updatedBooking) => {
         setBookings(prev => prev.map(b => b._id === updatedBooking._id ? updatedBooking : b));
+        setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
     };
 
     const handleTrekFormSubmit = async (trekData, trekId) => {
@@ -383,6 +391,7 @@ export default function App() {
 
     const handleNewOrder = (newOrder) => {
         setOrders(prev => [newOrder, ...prev]);
+        setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
     };
 
     const handleProductUpdate = (updatedProduct) => {
@@ -400,6 +409,7 @@ export default function App() {
                                         bookings={bookings}
                                         onNewBooking={handleNewBooking}
                                         onBookingUpdate={handleBookingUpdate}
+                                        onPaymentFailure={handlePaymentFailure}
                                         onNewReview={handleNewReview}
                                         onUpdateReview={handleUpdateReview}
                                         onDeleteReview={handleDeleteReview}
@@ -432,6 +442,7 @@ export default function App() {
                             onUpdateProfile={handleUpdateProfile} 
                             onChangePassword={handleChangePassword}
                             onBookingUpdate={handleBookingUpdate}
+                            onPaymentFailure={handlePaymentFailure}
                             setPage={setPage}
                         />;
             case 'login':
@@ -467,6 +478,7 @@ export default function App() {
                                             orders={orders}
                                             onNewOrder={handleNewOrder}
                                             onProductUpdate={handleProductUpdate}
+                                            onPaymentFailure={handlePaymentFailure}
                                             setPage={setPage} 
                                         /> : <ShopPage products={products} setPage={setPage} />;
             case 'treks': return <TreksPage treks={treks} setPage={setPage} />;
@@ -544,6 +556,13 @@ export default function App() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                 </button>
             )}
+
+            <PaymentStatusModal 
+                isOpen={paymentStatus.show}
+                onClose={() => setPaymentStatus({ show: false, status: '', message: '' })}
+                status={paymentStatus.status}
+                message={paymentStatus.message}
+            />
 
             <Footer setPage={setPage} />
         </div>
