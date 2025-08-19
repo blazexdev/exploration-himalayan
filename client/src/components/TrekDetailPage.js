@@ -435,7 +435,7 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
                                {paymentError && <p className="text-red-500 text-sm text-center">{paymentError}</p>}
                                
                                <button type="submit" disabled={isLoading} className="w-full bg-teal-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-600 transition duration-300 text-lg disabled:opacity-50">
-                                   {isLoading ? 'Processing...' : (paymentAmount && Number(paymentAmount) > 0 ? 'Pay & Book' : 'Send Inquiry')}
+                                   {isLoading ? 'Submitting...' : (paymentAmount && Number(paymentAmount) > 0 ? 'Pay & Book' : 'Send Inquiry')}
                                </button>
                             </form>
                         </div>
