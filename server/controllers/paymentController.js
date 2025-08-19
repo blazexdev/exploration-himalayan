@@ -93,6 +93,7 @@ exports.verifyNewBookingPayment = async (req, res) => {
     try {
         const newBooking = await Booking.create({
             ...bookingDetails,
+            paymentId: payment._id,
             totalPrice: bookingDetails.totalPrice,
             amountPaid: amount / 100,
             paymentStatus: (amount / 100) >= bookingDetails.totalPrice ? 'Completed' : 'Partially Paid',
@@ -103,10 +104,10 @@ exports.verifyNewBookingPayment = async (req, res) => {
             razorpay_payment_id,
             razorpay_order_id,
             razorpay_signature,
-            userEmail: newBooking.userEmail,
-            userName: newBooking.name,
-            trekId: newBooking.trekId,
-            trekName: newBooking.trekName,
+            userEmail: bookingDetails.userEmail,
+            userName: bookingDetails.name,
+            trekId: bookingDetails.trekId,
+            trekName: bookingDetails.trekName,
             amount: amount,
         });
 
@@ -119,10 +120,9 @@ exports.verifyNewBookingPayment = async (req, res) => {
         });
         await sendInvoiceEmail({ name: finalBooking.name, email: finalBooking.email }, payment, finalBooking);
         
-        res.json({ success: true, message: "Payment successful and booking confirmed!", booking: finalBooking });
+        res.json({ success: true, message: "Payment successful!", booking: newBooking, payment: payment });
     } catch (dbError) {
-        console.error("Database error during new booking payment:", dbError);
-        res.status(500).json({ success: false, message: "Payment successful, but failed to create booking record." });
+        res.status(500).json({ success: false, message: "Failed to save booking record." });
     }
 };
 
@@ -132,7 +132,7 @@ exports.verifyExistingBookingPayment = async (req, res) => {
     const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-        return res.status(400).json({ success: false, message: "Payment verification failed: Invalid signature." });
+        return res.status(400).json({ success: false, message: "Payment verification failed." });
     }
 
     try {
@@ -191,6 +191,36 @@ exports.verifyProductPayment = async (req, res) => {
     }
 
     try {
+        const payment = await Payment.create({
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            userEmail: req.user.email,
+            userName: req.user.name,
+            amount: amount,
+        });
+
+        const newOrder = new Order({
+            userId: req.user.id,
+            userEmail: req.user.email,
+            userName: req.user.name,
+            products: [{ productId: product._id, name: product.name, price: product.price }],
+            totalAmount: amount / 100,
+            paymentId: payment._id, // Link to the new Payment document
+            orderId: razorpay_order_id,
+            shippingAddress: shippingDetails,
+        });
+
+        const savedOrder = await newOrder.save();
+        await sendProductInvoiceEmail(savedOrder);
+        
+        // --- FIX: Return both the order and the new payment record ---
+        res.json({ success: true, message: "Payment successful!", order: savedOrder, payment: payment });
+
+    } catch (dbError) {
+        res.status(500).json({ success: false, message: "Failed to save your order." });
+    }
+};
         const newOrder = new Order({
             userId: req.user.id,
             userEmail: req.user.email,
