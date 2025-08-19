@@ -308,17 +308,19 @@ export default function App() {
         }
     };
 
-    const handleNewBooking = (newBooking) => {
+    const handleNewBooking = (newBooking, newPayment) => {
         setBookings(prev => [newBooking, ...prev]);
-        setPaymentStatus({ show: true, status: 'success', message: 'Your booking inquiry has been sent!' });
+        handleNewPayment(newPayment);
+        setPaymentStatus({ show: true, status: 'success', message: 'Your booking has been confirmed!' });
     };
 
     const handlePaymentFailure = (message) => {
         setPaymentStatus({ show: true, status: 'failure', message: message || 'Your payment could not be processed.' });
     };
 
-    const handleBookingUpdate = (updatedBooking) => {
+    const handleBookingUpdate = (updatedBooking, newPayment) => {
         setBookings(prev => prev.map(b => b._id === updatedBooking._id ? updatedBooking : b));
+        handleNewPayment(newPayment);
         setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
     };
 
@@ -389,8 +391,15 @@ export default function App() {
         }
     };
 
-    const handleNewOrder = (newOrder) => {
+    const handleNewPayment = (newPayment) => {
+        if (newPayment) {
+            setPayments(prev => [newPayment, ...prev]);
+        }
+    };
+
+    const handleNewOrder = (newOrder, newPayment) => {
         setOrders(prev => [newOrder, ...prev]);
+        handleNewPayment(newPayment);
         setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
     };
 
