@@ -125,9 +125,9 @@ export default function App() {
                     api.getAllReviews(),
                     api.getProducts()
                 ]);
-                setTreks(treksRes.data);
-                setReviews(reviewsRes.data);
-                setProducts(productsRes.data);
+                setTreks(Array.isArray(treksRes.data) ? treksRes.data : []);
+                setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
+                setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
 
                 if (loggedInUser) {
                     const [bookingsRes, messagesRes, usersRes, paymentsRes, ordersRes] = await Promise.all([
@@ -137,11 +137,11 @@ export default function App() {
                         api.getPayments(),
                         api.getOrders()
                     ]);
-                    setBookings(bookingsRes.data);
-                    setMessages(messagesRes.data);
-                    setUsers(usersRes.data);
-                    setPayments(paymentsRes.data);
-                    setOrders(ordersRes.data);
+                    setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
+                    setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
+                    setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
+                    setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : []);
+                    setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
                 }
             } catch (error) {
                 console.error("Failed to load data:", error);
@@ -152,6 +152,21 @@ export default function App() {
         
         initializeApp();
     }, []);
+
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await api.getMessages();
+                setMessages(res.data);
+            } catch (error) {
+                console.error("Failed to poll for new messages:", error);
+            }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [currentUser]);
 
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -222,7 +237,7 @@ export default function App() {
             }
             return response.data;
         } catch (err) {
-            return err.response?.data;
+            return err.response?.data || { success: false, message: 'An unexpected error occurred.' };
         }
     };
     
