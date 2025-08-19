@@ -1,3 +1,6 @@
+// client/src/components/ContactPage.js
+// --- CORRECTED FILE ---
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 const icons = {
@@ -10,7 +13,6 @@ const LOGO_URL = "https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png";
 const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
     const chatContainerRef = useRef(null);
-    const chatEndRef = useRef(null);
 
     const userMessages = useMemo(() => 
         messages.filter(
@@ -20,6 +22,15 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
 
     const prevMessagesCount = useRef(userMessages.length);
 
+    const scrollToBottom = (behavior = 'smooth') => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: behavior
+            });
+        }
+    };
+
     useEffect(() => {
         const container = chatContainerRef.current;
         if (!container) return;
@@ -28,7 +39,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
         const isNewMessage = userMessages.length > prevMessagesCount.current;
 
         if (isScrolledToBottom && isNewMessage) {
-            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            scrollToBottom();
         }
         prevMessagesCount.current = userMessages.length;
     }, [userMessages]);
@@ -46,7 +57,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
                 content: reader.result,
                 fileName: file.name,
             });
-            setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+            setTimeout(() => scrollToBottom('smooth'), 100);
         };
         reader.readAsDataURL(file);
     };
@@ -61,7 +72,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
             content: newMessage.trim(),
         });
         setNewMessage('');
-        setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        setTimeout(() => scrollToBottom('smooth'), 100);
     };
 
     return (
@@ -75,7 +86,7 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
                                 <img src={LOGO_URL} alt="Admin" className="w-8 h-8 rounded-full object-cover"/>
                             )}
                             <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.from === 'admin' ? 'bg-gray-200 dark:bg-gray-700' : 'bg-teal-500 text-white'}`}>
-                                {msg.type === 'text' && <p>{msg.content}</p>}
+                                {msg.type === 'text' && <p className="break-words">{msg.content}</p>}
                                 {msg.type === 'image' && <img src={msg.content} alt={msg.fileName} className="rounded-lg"/>}
                                 {msg.type === 'video' && <video src={msg.content} controls className="rounded-lg w-full"/>}
                                 <p className="text-xs opacity-70 mt-1 text-right">{new Date(msg.timestamp).toLocaleTimeString()}</p>
@@ -85,7 +96,6 @@ const ContactPage = ({ currentUser, messages = [], onSendMessage }) => {
                             )}
                         </div>
                     ))}
-                    <div ref={chatEndRef} />
                 </div>
                 <form onSubmit={handleSubmit} className="p-4 border-t dark:border-gray-700 flex items-center">
                     <input type="file" id="contact-chat-upload" className="hidden" onChange={handleMediaUpload} accept="image/*,video/*" />
