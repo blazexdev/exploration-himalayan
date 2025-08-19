@@ -21,7 +21,8 @@ const Header = ({ setPage, onContactClick, currentUser, onLogout, theme, toggleT
 
     return (
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-30">
-            <nav className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            {/* --- THIS IS THE FIX: Added `relative` to make it the positioning context --- */}
+            <nav className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center relative">
                 <div className="flex items-center cursor-pointer" onClick={() => handleLinkClick('home')}>
                     <img src={LOGO_URL} alt={`${COMPANY_NAME} Logo`} className="h-12 sm:h-14 mr-2 filter drop-shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
                     <span className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white hidden sm:block">{COMPANY_NAME}</span>
