@@ -68,6 +68,21 @@ const AdminPanel = ({
 
     const prevMessagesCount = useRef({});
 
+    const scrollToBottom = (behavior = 'smooth') => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: behavior
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (selectedUser) {
+            setTimeout(() => scrollToBottom('auto'), 100);
+        }
+    }, [selectedUser]);
+
     useEffect(() => {
         const container = chatContainerRef.current;
         if (!container || !selectedUser) return;
@@ -78,7 +93,7 @@ const AdminPanel = ({
         const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 150;
 
         if (currentMessages.length > prevCount && isScrolledToBottom) {
-            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            scrollToBottom('smooth');
         }
         
         prevMessagesCount.current[selectedUser] = currentMessages.length;
@@ -224,7 +239,7 @@ const AdminPanel = ({
             onSendMessage({ type: 'text', from: 'admin', to: selectedUser, content: replyMessage.trim() });
             setReplyMessage('');
         }
-        setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        setTimeout(() => scrollToBottom('smooth'), 100);
     };
     const handleManageAdmin = async (makeAdmin) => {
         setAdminMessage('');
@@ -523,7 +538,7 @@ const AdminPanel = ({
                                                 <img src={LOGO_URL} alt="Admin" className="w-8 h-8 rounded-full object-cover"/>
                                             )}
                                             <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.from === 'admin' ? 'bg-gray-200 dark:bg-gray-700' : 'bg-teal-500 text-white'}`}>
-                                                {msg.type === 'text' && <p>{msg.content}</p>}
+                                                {msg.type === 'text' && <p className="break-words">{msg.content}</p>}
                                                 {msg.type === 'image' && <img src={msg.content} alt={msg.fileName} className="rounded-lg"/>}
                                                 {msg.type === 'video' && <video src={msg.content} controls className="rounded-lg w-full"/>}
                                                 <p className="text-xs opacity-70 mt-1 text-right">{new Date(msg.timestamp).toLocaleTimeString()}</p>
