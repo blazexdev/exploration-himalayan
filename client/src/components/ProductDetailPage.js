@@ -1,3 +1,5 @@
+// client/src/components/ProductDetailPage.js
+
 import React, { useState, useMemo, useEffect } from 'react';
 import Modal from './Modal';
 import api from '../services/api';
@@ -28,7 +30,7 @@ const StarRating = ({ rating, onRatingChange }) => {
     );
 };
 
-const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onProductUpdate, onPaymentFailure, setPage }) => {
+const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onProductUpdate, setPage }) => {
     const [selectedImage, setSelectedImage] = useState(product.imageUrl);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -92,6 +94,7 @@ const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onPr
         setError('');
         try {
             const { data: { order } } = await api.createRazorpayOrder(product.price, null, true);
+            
             const options = {
                 key: process.env.REACT_APP_RAZORPAY_KEY_ID,
                 amount: order.amount,
@@ -112,13 +115,13 @@ const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onPr
                     
                     const { data } = await api.verifyProductPayment(paymentData);
                     if (data.success) {
-                        onNewOrder(data.order); // This triggers the success modal
+                        alert('Payment successful! Your order has been placed.');
+                        onNewOrder(data.order);
                         setIsCheckoutModalOpen(false);
                     } else {
-                        onPaymentFailure('Payment verification failed.');
+                        setError('Payment verification failed.');
                     }
                 },
-            };
                 prefill: {
                     name: shippingDetails.name,
                     email: shippingDetails.email,
@@ -127,12 +130,9 @@ const ProductDetailPage = ({ product, currentUser, orders = [], onNewOrder, onPr
                 theme: { color: "#0d9488" },
             };
             const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response){
-                onPaymentFailure(response.error.description);
-            });
             rzp.open();
         } catch (err) {
-            onPaymentFailure('Could not initiate payment.');
+            setError('Could not initiate payment. Please try again.');
         } finally {
             setIsLoading(false);
         }
