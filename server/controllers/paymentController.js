@@ -204,22 +204,6 @@ exports.verifyProductPayment = async (req, res) => {
             userId: req.user.id,
             userEmail: req.user.email,
             userName: req.user.name,
-            products: [{ productId: product._id, name: product.name, price: product.price }],
-            totalAmount: amount / 100,
-            paymentId: payment._id, // Link to the new Payment document
-            orderId: razorpay_order_id,
-            shippingAddress: shippingDetails,
-        });
-
-        const savedOrder = await newOrder.save();
-        await sendProductInvoiceEmail(savedOrder);
-        
-        // --- FIX: Return both the order and the new payment record ---
-        
-        const newOrder = new Order({
-            userId: req.user.id,
-            userEmail: req.user.email,
-            userName: req.user.name,
             products: [{
                 productId: product._id,
                 name: product.name,
@@ -230,6 +214,10 @@ exports.verifyProductPayment = async (req, res) => {
             orderId: razorpay_order_id,
             shippingAddress: shippingDetails,
         });
+        
+        // --- FIX: Return both the order and the new payment record ---
+        
+        
 
         const savedOrder = await newOrder.save();
 
