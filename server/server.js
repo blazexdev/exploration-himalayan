@@ -20,6 +20,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders')); // Add orders route
+app.use('/api/notifications', require('./routes/notifications'));
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
