@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NotificationBell from './NotificationBell';
 
 const icons = {
   home: <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
@@ -18,7 +19,7 @@ const icons = {
 const COMPANY_NAME = "Exploration Himalayan";
 const LOGO_URL = "https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png";
 
-const Header = ({ setPage, currentUser, onLogout, theme, toggleTheme }) => {
+const Header = ({ setPage, onContactClick, currentUser, onLogout, theme, toggleTheme, notifications, onNotificationUpdate }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLinkClick = (pageName) => {
@@ -47,6 +48,7 @@ const Header = ({ setPage, currentUser, onLogout, theme, toggleTheme }) => {
                             )}
                             <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('dashboard'); }} className="text-gray-600 dark:text-gray-300 hover:text-teal-500 dark:hover:text-teal-400 transition duration-300">Dashboard</a>
                             <button onClick={onLogout} className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">Logout</button>
+                            <NotificationBell notifications={notifications} onNotificationUpdate={onNotificationUpdate} setPage={setPage} />
                         </>
                     ) : (
                         <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('signup'); }} className="bg-teal-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600 transition duration-300">Sign Up</a>
@@ -82,6 +84,7 @@ const Header = ({ setPage, currentUser, onLogout, theme, toggleTheme }) => {
                                 )}
                                 <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('dashboard'); }} className="text-gray-800 dark:text-white text-lg">Dashboard</a>
                                 <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); }} className="w-3/4 bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">Logout</button>
+                                <NotificationBell notifications={notifications} onNotificationUpdate={onNotificationUpdate} setPage={setPage} />
                             </>
                         ) : (
                             <a href="#" onClick={(e) => { e.preventDefault(); handleLinkClick('signup'); }} className="w-3/4 text-center bg-teal-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600 transition duration-300">Sign Up</a>
