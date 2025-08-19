@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 
 const icons = {
-    bell: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+    bell: <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
 };
 
 const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
@@ -36,7 +36,8 @@ const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        // --- THIS IS THE FIX: Removed `relative` so the dropdown positions itself relative to the <nav> ---
+        <div ref={dropdownRef}>
             <button onClick={() => setIsOpen(prev => !prev)} className="relative text-gray-600 dark:text-gray-300 hover:text-teal-500 dark:hover:text-teal-400 p-2 rounded-full">
                 {icons.bell}
                 {unreadCount > 0 && (
@@ -46,9 +47,8 @@ const NotificationBell = ({ notifications, onNotificationUpdate, setPage }) => {
                 )}
             </button>
             {isOpen && (
-                // --- THIS IS THE FIX ---
-                // Added responsive classes to keep the dropdown on-screen on mobile
-                <div className="absolute top-full right-0 md:right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm md:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50">
+                // --- THIS IS THE FIX: Positioned from the right edge of the screen on all sizes ---
+                <div className="absolute top-full right-4 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50">
                     <div className="p-4 flex justify-between items-center border-b dark:border-gray-700">
                         <h3 className="font-bold">Notifications</h3>
                         {unreadCount > 0 && (
