@@ -1,5 +1,3 @@
-// client/src/components/TrekDetailPage.js
-
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from './Modal';
 import api from '../services/api';
@@ -445,7 +443,7 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
             <Modal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)}>
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-teal-500 mb-4">Inquiry Sent!</h2>
-                    <p>Thank you! We've received your booking inquiry for the {trek.name} and will contact you at {formData.email} shortly.</p>
+                    <p>Thank you! We've received your booking inquiry for the {trek.name} trek and will contact you at {formData.email} shortly.</p>
                 </div>
             </Modal>
             
