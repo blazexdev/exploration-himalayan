@@ -1,6 +1,3 @@
-// client/src/App.js
-// --- CORRECTED FILE ---
-
 import React, { useState, useEffect } from 'react';
 import api from './services/api';
 import Header from './components/Header';
@@ -17,7 +14,6 @@ import LoadingScreen from './components/LoadingScreen';
 import ChatWindow from './components/ChatWindow';
 import ShopPage from './components/ShopPage';
 import ProductDetailPage from './components/ProductDetailPage';
-import NotificationBell from './components/NotificationBell';
 
 const AboutUsPage = () => <StaticPage title="About Us"><p>Welcome to Exploration Himalayan! We are passionate about sharing the breathtaking beauty of the Himalayas with adventurers from around the world...</p></StaticPage>;
 const PrivacyPolicyPage = () => <StaticPage title="Privacy Policy"><p>Your privacy is important to us...</p></StaticPage>;
@@ -44,32 +40,6 @@ export default function App() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isChatPopupOpen, setIsChatPopupOpen] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            if (localStorage.getItem('token')) {
-                try {
-                    const res = await api.getNotifications();
-                    setNotifications(res.data);
-                } catch (err) {
-                    console.error("Could not fetch notifications");
-                }
-            }
-        };
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 15000); // Poll every 15 seconds
-        return () => clearInterval(interval);
-    }, [currentUser]); // Refetch when user logs in/out
-
-    const handleNotificationUpdate = (updatedNotification) => {
-        if (updatedNotification) {
-            setNotifications(prev => prev.map(n => n._id === updatedNotification._id ? updatedNotification : n));
-        } else {
-            // If null is passed, refetch all notifications (used for mark all as read)
-            api.getNotifications().then(res => setNotifications(res.data));
-        }
-    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -152,6 +122,23 @@ export default function App() {
         
         initializeApp();
     }, []);
+
+    // --- THIS IS THE FIX: Real-time chat polling ---
+    useEffect(() => {
+        if (!currentUser) return; // Only poll for messages if a user is logged in
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await api.getMessages();
+                setMessages(res.data);
+            } catch (error) {
+                console.error("Failed to poll for new messages:", error);
+            }
+        }, 3000); // Check for new messages every 3 seconds
+
+        return () => clearInterval(interval); // Clean up the interval on component unmount
+    }, [currentUser]);
+
 
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -473,7 +460,7 @@ export default function App() {
 
     return (
         <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans flex flex-col min-h-screen transition-colors duration-500">
-            <Header setPage={setPage} onContactClick={handleNavbarContact} currentUser={currentUser} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} notifications={notifications} onNotificationUpdate={handleNotificationUpdate}/>
+            <Header setPage={setPage} onContactClick={handleNavbarContact} currentUser={currentUser} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />
             <main className="flex-grow">
                 <div key={page.name + (page.trekId || '')} className="animate-fade-in">
                     {renderPage()}
