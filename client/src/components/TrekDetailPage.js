@@ -168,7 +168,8 @@ const TrekDetailPage = ({ trek, reviews = [], bookings = [], onNewBooking, onBoo
                     
                     const { data } = await api.verifyNewBookingPayment(paymentData);
                     if (data.success) {
-                        onNewBooking(data.booking); // This now triggers the success modal in App.js
+                        // --- FIX: Pass both the booking and the payment to the handler ---
+                        onNewBooking(data.booking, data.payment);
                     } else {
                         onPaymentFailure('Payment verification failed.');
                     }
