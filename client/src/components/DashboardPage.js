@@ -12,7 +12,7 @@ const icons = {
 
 const ITEMS_PER_PAGE = 5;
 
-const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser, onUpdateProfile, onChangePassword, onBookingUpdate, setPage }) => {
+const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser, onUpdateProfile, onChangePassword, onBookingUpdate, onPaymentFailure, setPage }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [profileData, setProfileData] = useState({ name: '', age: '', address: '', gender: '', phone: '', imageUrl: '' });
     const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
@@ -146,7 +146,6 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
         setIsLoading(true);
         try {
             const { data: { order } } = await api.createRazorpayOrder(paymentAmount, selectedBooking._id);
-
             const options = {
                 key: process.env.REACT_APP_RAZORPAY_KEY_ID,
                 amount: order.amount,
@@ -166,19 +165,22 @@ const DashboardPage = ({ bookings = [], payments = [], orders = [], currentUser,
                     
                     const { data } = await api.verifyExistingBookingPayment(paymentData);
                     if (data.success) {
-                        onBookingUpdate(data.booking);
+                        onBookingUpdate(data.booking); // This triggers the success modal
                         closePaymentModal();
                     } else {
-                        setPaymentError('Payment verification failed.');
+                        onPaymentFailure('Payment verification failed.');
                     }
                 },
                 prefill: { name: currentUser.name, email: currentUser.email, contact: currentUser.phone || '' },
                 theme: { color: "#0d9488" },
             };
             const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                onPaymentFailure(response.error.description);
+            });
             rzp.open();
         } catch (error) {
-            setPaymentError('Failed to initiate payment.');
+            onPaymentFailure('Could not initiate payment.');
         } finally {
             setIsLoading(false);
         }
