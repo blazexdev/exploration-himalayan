@@ -1,6 +1,3 @@
-// client/src/App.js
-// --- CORRECTED FILE ---
-
 import React, { useState, useEffect } from 'react';
 import api from './services/api';
 import Header from './components/Header';
@@ -298,24 +295,19 @@ export default function App() {
         if (newPayment) {
             setPayments(prev => [newPayment, ...prev]);
             setPaymentStatus({ show: true, status: 'success', message: 'Your booking has been confirmed!' });
-        } else {
-            // This is for inquiry only, no payment animation needed
         }
-        reloadUserData();
     };
 
     const handleBookingUpdate = (updatedBooking, newPayment) => {
         setBookings(prev => prev.map(b => b._id === updatedBooking._id ? updatedBooking : b));
         if (newPayment) setPayments(prev => [newPayment, ...prev]);
         setPaymentStatus({ show: true, status: 'success', message: 'Your payment was successful and your booking has been updated.' });
-        reloadUserData();
     };
 
     const handleNewOrder = (newOrder, newPayment) => {
         setOrders(prev => [newOrder, ...prev]);
         if (newPayment) setPayments(prev => [newPayment, ...prev]);
         setPaymentStatus({ show: true, status: 'success', message: 'Your order has been placed successfully!' });
-        reloadUserData();
     };
     
     const handlePaymentFailure = (message) => {
