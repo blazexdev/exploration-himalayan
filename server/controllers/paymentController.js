@@ -1,5 +1,3 @@
-// server/controllers/paymentController.js
-
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Payment = require('../models/Payment');
@@ -31,7 +29,31 @@ const sendInvoiceEmail = async (user, payment, booking) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `Payment Confirmation & Invoice for ${booking.trekName}`,
-        html: `...` // Your styled invoice email
+        html: `
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Logo" style="max-width: 150px;">
+        <h1 style="color: #0d9488;">Invoice & Booking Confirmation</h1>
+    </div>
+    <p>Hi ${user.name},</p>
+    <p>Thank you for your payment! Your booking for the <strong>${booking.trekName}</strong> trek is now updated.</p>
+    
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Payment Details</h3>
+    <p><strong>Payment ID:</strong> ${payment.razorpay_payment_id}</p>
+    <p><strong>Order ID:</strong> ${payment.razorpay_order_id}</p>
+    <p><strong>Amount Paid:</strong> ₹${(payment.amount / 100).toLocaleString('en-IN')}</p>
+    <p><strong>Date:</strong> ${new Date(payment.createdAt).toLocaleDateString('en-IN')}</p>
+
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Booking Details</h3>
+    <p><strong>Trek:</strong> ${booking.trekName}</p>
+    <p><strong>Trek Date:</strong> ${booking.date}</p>
+    <p><strong>Total Paid:</strong> ₹${booking.amountPaid.toLocaleString('en-IN')} / ₹${booking.totalPrice.toLocaleString('en-IN')}</p>
+    <p><strong>Status:</strong> ${booking.status}</p>
+
+    <p>We're excited to have you with us. We will be in touch with more details about your upcoming adventure.</p>
+    <p>The Exploration Himalayan Team</p>
+</div>
+        `,
     };
     try {
         await transporter.sendMail(mailOptions);
@@ -45,7 +67,54 @@ const sendProductInvoiceEmail = async (order) => {
         from: `"Exploration Himalayan" <${process.env.EMAIL_USER}>`,
         to: order.userEmail,
         subject: `Your Exploration Himalayan Order Confirmation #${order.orderId}`,
-        html: `...` // Your styled product invoice email
+        html: `
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://i.ibb.co/VW3kNJGd/1000006623-removebg-preview.png" alt="Logo" style="max-width: 150px;">
+        <h1 style="color: #0d9488;">Thank You for Your Order!</h1>
+    </div>
+    <p>Hi ${order.userName},</p>
+    <p>We've received your order and are getting it ready for shipment. Here are the details:</p>
+    
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Order Summary</h3>
+    <p><strong>Order ID:</strong> ${order.orderId}</p>
+    <p><strong>Payment ID:</strong> ${order.paymentId}</p>
+    <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <thead style="background-color: #f1f5f9;">
+            <tr>
+                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Product</th>
+                <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${order.products.map(p => `
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${p.name}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">₹${p.price.toLocaleString('en-IN')}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>Total:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;"><strong>₹${order.totalAmount.toLocaleString('en-IN')}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Shipping Address</h3>
+    <p>
+        ${order.shippingAddress.name}<br>
+        ${order.shippingAddress.address}<br>
+        ${order.shippingAddress.phone}
+    </p>
+
+    <p>We'll notify you again once your order has shipped. If you have any questions, please reply to this email.</p>
+    <p>The Exploration Himalayan Team</p>
+</div>
+        `,
     };
     try {
         await transporter.sendMail(mailOptions);
